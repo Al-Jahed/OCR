@@ -40,6 +40,12 @@ def extract_text(file, filetype):
     
     return text
 
+# Function to extract numbered passages and their first lines
+def extract_numbered_passages_with_lines(text):
+    pattern = r"(?m)^\s*(\d+[.,])\s*(.*?)(?:\n|$)"  # Capture the number and the first line after it
+    matches = re.findall(pattern, text)
+    return matches
+
 # Function to count numbered passages
 def count_numbered_passages(text):
     pattern = r"(?m)^\s*\d+[.,]"  # Start of line, digits, then . or ,
@@ -51,10 +57,20 @@ if uploaded_file:
         text = extract_text(uploaded_file, filetype)
 
     if text:
+        # Count the numbered passages
         count = count_numbered_passages(text)
         st.success(f"✅ Found **{count}** numbered passage(s) in the file!")
+
+        # Display Extracted Text
         with st.expander("📄 View Extracted Text"):
             st.text_area("Text Preview", text, height=300)
+
+        # Section to list the numbered passages with their first line
+        numbered_passages = extract_numbered_passages_with_lines(text)
+        if numbered_passages:
+            st.markdown("### 🔢 First Lines of Numbered Passages:")
+            for num, line in numbered_passages:
+                st.write(f"{num} {line.strip()}")
     else:
         st.warning("No text found or unsupported format.")
 else:
